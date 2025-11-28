@@ -33,7 +33,6 @@ public class Example {
 
     private static void getStats(List<ClassInfo> allClasses) {
         int totalFields = 0;
-        int totalMethods = 0;
         int totalAssignments = 0;
         int totalOverrideMethods = 0;
         int maxDepth = 0;
@@ -46,9 +45,9 @@ public class Example {
 
         for (ClassInfo classInfo : allClasses) {
             totalFields += classInfo.fields.size();
-            totalMethods += classInfo.methods.size();
             for (MethodInfo methodInfo : classInfo.methods) {
                 totalAssignments += methodInfo.assignments;
+                String parent = classInfo.superName;
             }
             int depth = 0;
             String s = classInfo.superName;
@@ -62,5 +61,14 @@ public class Example {
             }
         }
 
+        int avgDepth = !allClasses.isEmpty() ? (sumDepth / allClasses.size()) : 0;
+        int avgFields = !allClasses.isEmpty() ? (totalFields / allClasses.size()) : 0;
+        int avgOverride = !allClasses.isEmpty() ? (totalOverrideMethods / allClasses.size()) : 0;
+
+        System.out.println("Средняя глубина наследования: " + avgDepth);
+        System.out.println("Максимальная глубина наследования: " + maxDepth);
+        System.out.println("Среднее количество полей в классе: " + avgFields);
+        System.out.println("Среднее количество переопределнных методов: " + avgOverride);
+        System.out.println("Метрика ABC (сумма assignments): " + totalAssignments);
     }
 }
