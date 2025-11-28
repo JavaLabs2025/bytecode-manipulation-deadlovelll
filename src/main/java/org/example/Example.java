@@ -1,14 +1,13 @@
 package org.example;
 
 import org.example.structs.ClassInfo;
+import org.example.structs.MethodInfo;
 import org.example.visitor.ClassPrinter;
 import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -33,6 +32,35 @@ public class Example {
     }
 
     private static void getStats(List<ClassInfo> allClasses) {
-        System.out.println("Classes count: " + allClasses.size());
+        int totalFields = 0;
+        int totalMethods = 0;
+        int totalAssignments = 0;
+        int totalOverrideMethods = 0;
+        int maxDepth = 0;
+        int sumDepth = 0;
+
+        Map<String, String> superMap = new HashMap<>();
+        for (ClassInfo classInfo : allClasses) {
+            superMap.put(classInfo.name, classInfo.superName);
+        }
+
+        for (ClassInfo classInfo : allClasses) {
+            totalFields += classInfo.fields.size();
+            totalMethods += classInfo.methods.size();
+            for (MethodInfo methodInfo : classInfo.methods) {
+                totalAssignments += methodInfo.assignments;
+            }
+            int depth = 0;
+            String s = classInfo.superName;
+            while (s != null && !s.equals("java/lang/Object")) {
+                depth++;
+                s = superMap.get(s);
+            }
+            if (depth >= maxDepth) {
+                maxDepth = depth;
+                sumDepth += depth;
+            }
+        }
+
     }
 }
