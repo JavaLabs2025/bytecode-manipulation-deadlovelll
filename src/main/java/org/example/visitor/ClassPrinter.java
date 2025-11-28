@@ -13,7 +13,6 @@ public class ClassPrinter extends ClassVisitor {
 
     private ClassInfo currentClass;
     private List<ClassInfo> allClasses;
-    private ClassInfo classInfo;
 
     public ClassPrinter(List<ClassInfo> allClasses) {
         super(ASM8);
@@ -28,9 +27,9 @@ public class ClassPrinter extends ClassVisitor {
             String superName,
             String[] interfaces
     ) {
-        classInfo = new ClassInfo();
-        classInfo.name = name;
-        classInfo.superName = superName;
+        currentClass = new ClassInfo();
+        currentClass.name = name;
+        currentClass.superName = superName;
     }
 
     public void visitSource(
