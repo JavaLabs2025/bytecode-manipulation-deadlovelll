@@ -2,6 +2,7 @@ package org.example.abc_visitor;
 
 import org.example.structs.MethodInfo;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 
 public class AbcVisitor extends MethodVisitor {
@@ -14,7 +15,15 @@ public class AbcVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-        super.visitMethodInsn(opcode, owner, name, desc, itf);
+    public void visitMethodInsn(
+            int opcode,
+            String owner,
+            String name,
+            String desc,
+            boolean itf
+    ) {
+        if ((opcode >= Opcodes.ISTORE && opcode <= Opcodes.ASTORE) || opcode  == Opcodes.IINC) {
+            methodInfo.assignments++;
+        }
     }
 }

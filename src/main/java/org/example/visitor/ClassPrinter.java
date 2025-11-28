@@ -1,7 +1,9 @@
 package org.example.visitor;
 
+import org.example.abc_visitor.AbcVisitor;
 import org.example.structs.MethodInfo;
 import org.objectweb.asm.*;
+
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ASM8;
@@ -13,8 +15,9 @@ public class ClassPrinter extends ClassVisitor {
     private List<ClassInfo> allClasses;
     private ClassInfo classInfo;
 
-    public ClassPrinter() {
+    public ClassPrinter(List<ClassInfo> allClasses) {
         super(ASM8);
+        this.allClasses = allClasses;
     }
 
     public void visit(
@@ -82,7 +85,7 @@ public class ClassPrinter extends ClassVisitor {
         MethodInfo methodInfo = new MethodInfo();
         methodInfo.name = name;
         currentClass.methods.add(methodInfo);
-        return null;
+        return new AbcVisitor(Opcodes.ASM9, methodInfo);
     }
 
     public void visitEnd() {allClasses.add(currentClass);}
