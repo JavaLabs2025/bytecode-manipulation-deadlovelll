@@ -15,15 +15,12 @@ public class AbcVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(
-            int opcode,
-            String owner,
-            String name,
-            String desc,
-            boolean itf
-    ) {
-        if ((opcode >= Opcodes.ISTORE && opcode <= Opcodes.ASTORE) || opcode  == Opcodes.IINC) {
+    public void visitVarInsn(int opcode, int var) {
+        if (
+                (opcode >= Opcodes.ISTORE && opcode <= Opcodes.ASTORE) || opcode == Opcodes.IINC)
+        {
             methodInfo.assignments++;
         }
+        super.visitVarInsn(opcode, var);
     }
 }

@@ -20,6 +20,7 @@ public class Example {
             Enumeration<JarEntry> enumeration = sampleJar.entries();
             while (enumeration.hasMoreElements()) {
                 JarEntry entry = enumeration.nextElement();
+                System.out.println("Processing: " + entry.getName());
                 if (entry.getName().endsWith(".class")) {
                     ClassPrinter cp = new ClassPrinter(allClasses);
                     InputStream inputStream = sampleJar.getInputStream(entry);
@@ -55,9 +56,9 @@ public class Example {
                 depth++;
                 s = superMap.get(s);
             }
-            if (depth >= maxDepth) {
+            sumDepth += depth;
+            if (depth > maxDepth) {
                 maxDepth = depth;
-                sumDepth += depth;
             }
         }
 

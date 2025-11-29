@@ -19,6 +19,7 @@ public class ClassPrinter extends ClassVisitor {
         this.allClasses = allClasses;
     }
 
+    @Override
     public void visit(
             int version,
             int access,
@@ -30,39 +31,50 @@ public class ClassPrinter extends ClassVisitor {
         currentClass = new ClassInfo();
         currentClass.name = name;
         currentClass.superName = superName;
+        super.visit(version, access, name, signature, superName, interfaces);
     }
 
+    @Override
     public void visitSource(
             String source,
             String debug
     ) {
+        super.visitSource(source, debug);
     }
 
+    @Override
     public void visitOuterClass(
             String owner,
             String name,
             String desc
     ) {
+        super.visitOuterClass(owner, name, desc);
     }
 
+    @Override
     public AnnotationVisitor visitAnnotation(
             String desc,
             boolean visible
     ) {
-        return null;
+        return super.visitAnnotation(desc, visible);
     }
 
+    @Override
     public void visitAttribute(Attribute attr) {
+        super.visitAttribute(attr);
     }
 
+    @Override
     public void visitInnerClass(
             String name,
             String outerName,
             String innerName,
             int access
     ) {
+        super.visitInnerClass(name, outerName, innerName, access);
     }
 
+    @Override
     public FieldVisitor visitField(
             int access,
             String name,
@@ -74,6 +86,7 @@ public class ClassPrinter extends ClassVisitor {
         return super.visitField(access, name, desc, signature, value);
     }
 
+    @Override
     public MethodVisitor visitMethod(
             int access,
             String name,
@@ -87,6 +100,10 @@ public class ClassPrinter extends ClassVisitor {
         return new AbcVisitor(Opcodes.ASM9, methodInfo);
     }
 
-    public void visitEnd() {allClasses.add(currentClass);}
+    @Override
+    public void visitEnd() {
+        allClasses.add(currentClass);
+        super.visitEnd();
+    }
 }
 
