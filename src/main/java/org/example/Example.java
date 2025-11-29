@@ -1,10 +1,13 @@
 package org.example;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.example.structs.ClassInfo;
 import org.example.structs.MethodInfo;
 import org.example.visitor.ClassPrinter;
 import org.objectweb.asm.ClassReader;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -32,7 +35,11 @@ public class Example {
         getStats(allClasses);
     }
 
-    private static void getStats(List<ClassInfo> allClasses) {
+    private static void getStats(
+            List<ClassInfo> allClasses
+    )
+            throws IOException
+    {
         int totalFields = 0;
         int totalAssignments = 0;
         int totalOverrideMethods = 0;
@@ -71,5 +78,16 @@ public class Example {
         System.out.println("Среднее количество полей в классе: " + avgFields);
         System.out.println("Среднее количество переопределнных методов: " + avgOverride);
         System.out.println("Метрика ABC (сумма assignments): " + totalAssignments);
+
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("averageInheritanceDepth", avgDepth);
+        metrics.put("maxInheritanceDepth", maxDepth);
+        metrics.put("averageFieldsPerClass", avgFields);
+        metrics.put("averageOverriddenMethods", avgOverride);
+        metrics.put("ABC_metric_totalAssignments", totalAssignments);
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+        writer.writeValue(new File("results.json"), metrics);
     }
 }
