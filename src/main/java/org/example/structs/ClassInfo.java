@@ -8,4 +8,5 @@ public class ClassInfo {
     public String superName;
     public List<String> fields = new ArrayList<>();
     public List<MethodInfo> methods = new ArrayList<>();
+    public List<String> interfaces = new ArrayList<>();
 }
