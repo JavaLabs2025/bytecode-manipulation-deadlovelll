@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.example.structs.ClassInfo;
 import org.example.structs.MethodInfo;
+import org.example.util.InheritanceDepthCalculator;
+import org.example.util.OverrideDetector;
 import org.example.visitor.ClassPrinter;
 import org.objectweb.asm.ClassReader;
 
@@ -23,7 +25,6 @@ public class Example {
             Enumeration<JarEntry> enumeration = sampleJar.entries();
             while (enumeration.hasMoreElements()) {
                 JarEntry entry = enumeration.nextElement();
-                System.out.println("Processing: " + entry.getName());
                 if (entry.getName().endsWith(".class")) {
                     ClassPrinter cp = new ClassPrinter(allClasses);
                     InputStream inputStream = sampleJar.getInputStream(entry);
@@ -43,8 +44,9 @@ public class Example {
         int totalFields = 0;
         int totalAssignments = 0;
         int totalOverrideMethods = 0;
-        int maxDepth = 0;
-        int sumDepth = 0;
+
+        OverrideDetector detector = new OverrideDetector(allClasses);
+        InheritanceDepthCalculator calc = new InheritanceDepthCalculator(allClasses);
 
         Map<String, String> superMap = new HashMap<>();
         for (ClassInfo classInfo : allClasses) {
@@ -53,23 +55,17 @@ public class Example {
 
         for (ClassInfo classInfo : allClasses) {
             totalFields += classInfo.fields.size();
-            for (MethodInfo methodInfo : classInfo.methods) {
-                totalAssignments += methodInfo.assignments;
-                String parent = classInfo.superName;
-            }
-            int depth = 0;
-            String s = classInfo.superName;
-            while (s != null && !s.equals("java/lang/Object")) {
-                depth++;
-                s = superMap.get(s);
-            }
-            sumDepth += depth;
-            if (depth > maxDepth) {
-                maxDepth = depth;
+            for (MethodInfo m : classInfo.methods) {
+                totalAssignments += m.assignments;
+                if (detector.isOverride(classInfo, m)) {
+                    totalOverrideMethods++;
+                }
             }
         }
 
-        int avgDepth = !allClasses.isEmpty() ? (sumDepth / allClasses.size()) : 0;
+        int maxDepth = calc.getMaxDepth(allClasses);
+        int avgDepth = calc.getAverageDepth(allClasses);
+
         int avgFields = !allClasses.isEmpty() ? (totalFields / allClasses.size()) : 0;
         int avgOverride = !allClasses.isEmpty() ? (totalOverrideMethods / allClasses.size()) : 0;
 

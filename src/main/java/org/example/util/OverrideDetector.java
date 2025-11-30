@@ -5,61 +5,54 @@ import org.example.structs.MethodInfo;
 
 import java.util.List;
 
-public class OverrideGetter {
+public class OverrideDetector {
 
-    public int get(
-            List<ClassInfo> allClasses,
-            ClassInfo classInfo,
-            int totalAssignments,
-            int totalOverrideMethods
-    ) {
-        for (MethodInfo m : classInfo.methods) {
-            totalAssignments += m.assignments;
-            boolean isOverride = false;
-            String parent = classInfo.superName;
-            while (parent != null && !parent.equals("java/lang/Object")) {
-                String finalParent = parent;
-                ClassInfo parentClass = allClasses.stream()
-                        .filter(c -> c.name.equals(finalParent))
-                        .findFirst().orElse(null);
-                if (parentClass != null) {
-                    if (parentClass.methods.stream()
-                            .anyMatch(pm -> pm.name.equals(m.name) && pm.desc.equals(m.desc))) {
-                        isOverride = true;
-                        break;
-                    }
-                    parent = parentClass.superName;
-                } else break;
-            }
+    private final List<ClassInfo> classes;
 
-            for (String iface : classInfo.interfaces) {
-                ClassInfo ifaceClass = allClasses.stream().filter(c -> c.name.equals(iface)).findFirst().orElse(null);
-                if (ifaceClass != null && ifaceClass.methods.stream()
-                        .anyMatch(pm -> pm.name.equals(m.name) && pm.desc.equals(m.desc))) {
-                    isOverride = true;
-                    break;
-                }
-            }
-
-            if (isOverride) totalOverrideMethods++;
-        }
-        return totalOverrideMethods;
+    public OverrideDetector(List<ClassInfo> classes) {
+        this.classes = classes;
     }
 
-    private boolean overrideInterfaceCheck(
-            List<ClassInfo> allClasses,
-            ClassInfo classInfo
-    ) {
-        boolean isOverride = false;
-        for (String iface : classInfo.interfaces) {
-            ClassInfo ifaceClass = allClasses.stream().filter(
-                    c -> c.name.equals(iface)
-            ).findFirst().orElse(null);
-            if (ifaceClass != null && ifaceClass.methods.stream().anyMatch(pm -> pm.name.equals(m.name) && pm.desc.equals(m.desc))) {
-                isOverride = true;
-                return isOverride;
-            }
+    public boolean isOverride(ClassInfo cls, MethodInfo method) {
+        if (checkSuperclass(cls.superName, method)) return true;
+
+        for (String iface : cls.interfaces) {
+            if (checkInterface(iface, method)) return true;
         }
-        return null;
+
+        return false;
+    }
+
+    private boolean checkSuperclass(String parent, MethodInfo method) {
+        while (parent != null && !parent.equals("java/lang/Object")) {
+            ClassInfo parentClass = findClass(parent);
+            if (parentClass == null) return false;
+
+            if (containsMethod(parentClass, method)) {
+                return true;
+            }
+
+            parent = parentClass.superName;
+        }
+        return false;
+    }
+
+    private boolean checkInterface(String iface, MethodInfo method) {
+        ClassInfo ifaceClass = findClass(iface);
+        if (ifaceClass == null) return false;
+
+        return containsMethod(ifaceClass, method);
+    }
+
+    private boolean containsMethod(ClassInfo cls, MethodInfo m) {
+        return cls.methods.stream()
+                .anyMatch(pm -> pm.name.equals(m.name) && pm.desc.equals(m.desc));
+    }
+
+    private ClassInfo findClass(String internalName) {
+        return classes.stream()
+                .filter(c -> c.name.equals(internalName))
+                .findFirst()
+                .orElse(null);
     }
 }

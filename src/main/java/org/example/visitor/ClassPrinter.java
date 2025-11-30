@@ -4,6 +4,7 @@ import org.example.abc_visitor.AbcVisitor;
 import org.example.structs.MethodInfo;
 import org.objectweb.asm.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ASM8;
@@ -31,6 +32,9 @@ public class ClassPrinter extends ClassVisitor {
         currentClass = new ClassInfo();
         currentClass.name = name;
         currentClass.superName = superName;
+        if (interfaces != null) {
+            currentClass.interfaces.addAll(Arrays.asList(interfaces));
+        }
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
@@ -97,6 +101,7 @@ public class ClassPrinter extends ClassVisitor {
         MethodInfo methodInfo = new MethodInfo();
         methodInfo.name = name;
         currentClass.methods.add(methodInfo);
+        methodInfo.desc = desc;
         return new AbcVisitor(Opcodes.ASM9, methodInfo);
     }
 
