@@ -42,7 +42,9 @@ public class Example {
             throws IOException
     {
         int totalFields = 0;
-        int totalAssignments = 0;
+        int totalA = 0;
+        int totalB = 0;
+        int totalC = 0;
         int totalOverrideMethods = 0;
 
         OverrideDetector detector = new OverrideDetector(allClasses);
@@ -56,12 +58,21 @@ public class Example {
         for (ClassInfo classInfo : allClasses) {
             totalFields += classInfo.fields.size();
             for (MethodInfo m : classInfo.methods) {
-                totalAssignments += m.assignments;
+                totalA += m.assignments;
+                totalB += m.branches;
+                totalC += m.conditions;
+
                 if (detector.isOverride(classInfo, m)) {
                     totalOverrideMethods++;
                 }
             }
         }
+
+        double abcMetric = Math.sqrt(
+                totalA * totalA +
+                        totalB * totalB +
+                        totalC * totalC
+        );
 
         int maxDepth = calc.getMaxDepth(allClasses);
         int avgDepth = calc.getAverageDepth(allClasses);
@@ -73,14 +84,19 @@ public class Example {
         System.out.println("Максимальная глубина наследования: " + maxDepth);
         System.out.println("Среднее количество полей в классе: " + avgFields);
         System.out.println("Среднее количество переопределнных методов: " + avgOverride);
-        System.out.println("Метрика ABC (сумма assignments): " + totalAssignments);
+        System.out.println("Метрика ABC: " + abcMetric);
 
         Map<String, Object> metrics = new HashMap<>();
         metrics.put("averageInheritanceDepth", avgDepth);
         metrics.put("maxInheritanceDepth", maxDepth);
         metrics.put("averageFieldsPerClass", avgFields);
         metrics.put("averageOverriddenMethods", avgOverride);
-        metrics.put("ABC_metric_totalAssignments", totalAssignments);
+        metrics.put("ABC_metric", Map.of(
+                "A", totalA,
+                "B", totalB,
+                "C", totalC,
+                "value", abcMetric
+        ));
 
         ObjectMapper mapper = new ObjectMapper();
         ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();

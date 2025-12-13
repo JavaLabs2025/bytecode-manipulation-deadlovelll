@@ -5,4 +5,6 @@ public class MethodInfo {
     public boolean isOverride = false;
     public int assignments = 0;
     public String desc;
+    public int conditions;
+    public int branches;
 }
